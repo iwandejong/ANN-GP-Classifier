@@ -13,7 +13,7 @@ class ANN {
         std::vector<Mushroom*> testData;
 
         const int numInputs = 8;
-        const int numOutputs = 2;
+        const int numOutputs = 1;
         const int numHiddenLayers = 1;
         const int numNeuronsPerHiddenLayer = 8;
         
@@ -47,6 +47,8 @@ class ANN {
         float getRandomFloat();
 
         int getIndexOfMushroom(Mushroom* m);
+
+        float relu(float x);
 };
 
 #endif // ANN_H

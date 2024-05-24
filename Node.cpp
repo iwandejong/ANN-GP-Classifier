@@ -5,10 +5,10 @@ Node::Node(float w, float b, float i) : weight(w), bias(b), input(i) {}
 Node::~Node() {}
 
 void Node::print() {
-    // Implementation of the print function
-    std::cout << "input: " << input << std::endl; // "input: 0.0\n"
+    // Implementation of the print function as float
     std::cout << "Weight: " << weight << std::endl;
     std::cout << "Bias: " << bias << std::endl;
+    std::cout << "Input: " << setprecision(2) << input << std::endl;
 }
 
 float Node::getWeight() {
