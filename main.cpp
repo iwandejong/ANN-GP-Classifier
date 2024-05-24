@@ -34,7 +34,7 @@ void csvToObject(std::string inputFile, ANN* ann, bool isTrain = true) {
 
 int main() {
 
-    ANN* ann = new ANN(2);
+    ANN* ann = new ANN();
 
     csvToObject("mushroom_data/mushroom_train.csv", ann, true);
     csvToObject("mushroom_data/mushroom_test.csv", ann, false);

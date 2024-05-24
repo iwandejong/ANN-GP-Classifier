@@ -6,6 +6,7 @@ Node::~Node() {}
 
 void Node::print() {
     // Implementation of the print function
+    std::cout << "input: " << input << std::endl; // "input: 0.0\n"
     std::cout << "Weight: " << weight << std::endl;
     std::cout << "Bias: " << bias << std::endl;
 }
