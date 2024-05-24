@@ -110,7 +110,7 @@ void computeMinAndMax(std::string inputFile, std::vector<float>& minVals, std::v
 
 int main() {
 
-    ANN* ann = new ANN(1, 0.1);
+    ANN* ann = new ANN(10000, 0.002);
 
     std::vector<float> minVals;
     std::vector<float> maxVals;

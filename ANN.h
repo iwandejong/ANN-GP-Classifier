@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <numeric>
 
 #include "Mushroom.h"
 #include "Node.h"
@@ -15,13 +16,20 @@ class ANN {
         const int numInputs = 8;
         const int numOutputs = 1;
         const int numHiddenLayers = 1;
-        const int numNeuronsPerHiddenLayer = 8;
+        const int numNeuronsPerHiddenLayer = 12;
         
         float learningRate = 0.1;
 
         std::vector<Node*> inputLayer;
         std::vector<std::vector<Node*>> hiddenLayers;
         std::vector<Node*> outputLayer;
+
+        float inputBias = 1.0;
+        float hiddenBias = 1.0;
+        float outputBias = 1.0;
+
+        std::vector<std::vector<float>> weights;
+        std::vector<std::vector<float>> outputWeights;
 
         int stoppingCriteria = 1000;
     public:
@@ -36,11 +44,11 @@ class ANN {
 
         void visualize();
 
-        // void feedforward(Mushroom* m);
         // void backpropagation();
         // void updateWeights();
 
         void trainHelper(Mushroom* m);
+        float feedforward(Mushroom* m);
 
         float sigmoid(float x);
         float sigmoidDerivative(float x);
@@ -48,7 +56,8 @@ class ANN {
 
         int getIndexOfMushroom(Mushroom* m);
 
-        float relu(float x);
+        float calculateLoss();
+        float getRandomAlt(int numInputs);
 };
 
 #endif // ANN_H

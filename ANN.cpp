@@ -6,25 +6,45 @@ ANN::ANN(int stoppingCriteria, float learningRate) {
     testData = std::vector<Mushroom*>();
 
     for (int i = 0; i < numInputs; i++) {
-        inputLayer.push_back(new Node(0.0, 0.0));
+        inputLayer.push_back(new Node());
     }
 
     for (int i = 0; i < numHiddenLayers; i++) {
         std::vector<Node*> hiddenLayer;
         for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-            hiddenLayer.push_back(new Node(getRandomFloat(), 1.0));
+            hiddenLayer.push_back(new Node());
         }
         hiddenLayers.push_back(hiddenLayer);
     }
 
     for (int i = 0; i < numOutputs; i++) {
-        outputLayer.push_back(new Node(getRandomFloat(), 1.0));
+        outputLayer.push_back(new Node());
     }
+
+    for (int i = 0; i < numInputs; i++) {
+        std::vector<float> weight;
+        for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
+            weight.push_back(getRandomAlt(numInputs));
+        }
+        weights.push_back(weight);
+    }
+
+    for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
+        std::vector<float> outputWeight;
+        for (int j = 0; j < numOutputs; j++) {
+            outputWeight.push_back(getRandomAlt(numNeuronsPerHiddenLayer));
+        }
+        outputWeights.push_back(outputWeight);
+    }
+
+    // visualize();
+
+    inputBias = getRandomAlt(numInputs);
+    hiddenBias = getRandomAlt(numNeuronsPerHiddenLayer);
+    outputBias = getRandomAlt(numNeuronsPerHiddenLayer);
 
     this->stoppingCriteria = stoppingCriteria;
     this->learningRate = learningRate;
-
-    std::cout << this->learningRate << std::endl;
 }
 
 ANN::~ANN() {}
@@ -48,22 +68,31 @@ void ANN::train() {
     // Train the neural network
     int i = 0;
 
+    // visualize();
+
     // initialize weights and biases
-    float biasRandom = getRandomFloat();
-    for (int i = 0; i < numInputs; i++) {;
-        inputLayer[i]->setBias(biasRandom);
-    }
+    inputBias = getRandomFloat();
 
     while (i < stoppingCriteria) {
         // select a random mushroom from the training data
         int randomIndex = rand() % trainData.size();
         trainHelper(trainData[randomIndex]);
-        // updateWeights();
+        
+        if (i % 100 == 0) { // Print loss every 100 iterations
+            float loss = calculateLoss();
+            std::cout << "Iteration " << i << ", Loss: " << loss << std::endl;
+            if (i % 1000 == 0 && i > 0) {
+                learningRate *= 0.9;
+            }
+        }
         i++;
     }
 
+    std::cout << "After Training:" << std::endl;
+    // visualize();
+
     // Test the neural network
-    // test();
+    test();
 }
 
 void ANN::test() {
@@ -89,61 +118,43 @@ void ANN::test() {
 }
 
 bool ANN::classify(Mushroom* m) {
-    // Get the output of the neural network
-    float output = 0;
-    for (int i = 0; i < numInputs; i++) {
-        inputLayer[i]->setInput(m->getAttribute(i));
-    }
-
-    for (int n = 0; n < hiddenLayers.size(); n++) {
-        for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
-            // n1j = v0j + sum(vij * xi)
-            float n1 = hiddenLayers[n][i]->getBias();
-            for (int k = 0; k < numInputs; k++) {
-                n1 += inputLayer[i]->getInput() * sigmoid(inputLayer[i]->getInput());
-            }
-            hiddenLayers[n][i]->setInput(n1);
-        }
-    }
-
-    for (int i = 0; i < numOutputs; i++) {
-        float n2 = outputLayer[i]->getBias();
-        for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-            n2 += outputLayer[i]->getWeight() * sigmoid(hiddenLayers[0][j]->getInput());
-        }
-        output = n2;
-    }
-
-    std::cout << output << std::endl;
-
     // Classify the mushroom based on the output
-    return output > 0.5 ? true : false;
+    return feedforward(m) > 0.5 ? true : false;
 }
 
 void ANN::visualize() {
     // Visualize the neural network using Nodes
-    std::cout << "Input Layer" << std::endl;
-    for (int i = 0; i < numInputs; i++) {
-        inputLayer[i]->print();
-    }
+    // std::cout << "Input Layer" << std::endl;
+    // for (int i = 0; i < numInputs; i++) {
+    //     inputLayer[i]->print();
+    // }
 
-    std::cout << std::endl;
-    std::cout << "Hidden Layer" << std::endl;
-    for (int i = 0; i < numHiddenLayers; i++) {
+    // std::cout << std::endl;
+    // std::cout << "Hidden Layer" << std::endl;
+    // for (int i = 0; i < numHiddenLayers; i++) {
+    //     for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
+    //         hiddenLayers[i][j]->print();
+    //     }
+    // }
+
+    // std::cout << std::endl;
+    // std::cout << "Output Layer" << std::endl;
+    // for (int i = 0; i < numOutputs; i++) {
+    //     outputLayer[i]->print();
+    // }
+
+    // visualize the neural network
+    for (int i = 0; i < numInputs; i++) {
+        std::cout << "Input Neuron " << i << '\t';
+        std::cout << "Hidden Neuron 0" << std::endl;
         for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-            hiddenLayers[i][j]->print();
+            std::cout << "\t\t" << weights[i][j] << std::endl;
         }
     }
-
-    std::cout << std::endl;
-    std::cout << "Output Layer" << std::endl;
-    for (int i = 0; i < numOutputs; i++) {
-        outputLayer[i]->print();
-    }
+    std::cout << "\t\t\tOutput Neuron: \t[" << sigmoid(outputLayer[0]->getInput()) << "]" << std::endl;
 }
 
-// ANN helper functions
-void ANN::trainHelper(Mushroom* m) {
+float ANN::feedforward(Mushroom* m) {
     // Feedforward the neural network
     // Calculate n1 for each node in the hidden layer
     // Calculate activation function for each node in the hidden layer
@@ -153,130 +164,75 @@ void ANN::trainHelper(Mushroom* m) {
     // Set the input layer
     for (int i = 0; i < numInputs; i++) {
         inputLayer[i]->setInput(m->getAttribute(i));
+        // std::cout << m->getAttribute(i) << std::endl;
     }
+
+    float dropoutRate = 0.5;
 
     // calculate the activation function for each node in the hidden layer
     for (int n = 0; n < hiddenLayers.size(); n++) {
         for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
-            // n1j = v0j + sum(vij * xi)
-            float n1 = hiddenLayers[n][i]->getBias();
-            for (int k = 0; k < numInputs; k++) {
-                n1 += inputLayer[i]->getInput() * sigmoid(inputLayer[i]->getInput());
+            // dropout
+            float dropoutValue = (float)rand() / RAND_MAX;
+            if (dropoutValue < dropoutRate) {
+                hiddenLayers[n][i]->setInput(0.0f);
+            } else {
+                // n1j = v0j + sum(vij * xi)
+                float n1 = hiddenBias;
+                for (int k = 0; k < numInputs; k++) {
+                    n1 += weights[k][i] * sigmoid(inputLayer[k]->getInput());
+                }
+                hiddenLayers[n][i]->setInput(n1);
             }
-            hiddenLayers[n][i]->setInput(n1);
         }
     }
 
     // calculate the activation function for each node in the output layer
+    float n2 = outputBias;
     for (int i = 0; i < numOutputs; i++) {
         // n2m = w0m + sum(wjm * f(n1j))
-        float n2 = outputLayer[i]->getBias();
         for (int k = 0; k < hiddenLayers.size(); k++) {
             for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-                n2 += hiddenLayers[k][j]->getWeight() * sigmoid(hiddenLayers[k][j]->getInput());
+                n2 += outputWeights[j][i] * sigmoid(hiddenLayers[k][j]->getInput());
             }
         }
         outputLayer[i]->setInput(n2);
     }
 
-    std::cout << "Training one input" << std::endl;
-    
-    std::cout << "Input Layer" << std::endl;
-    for (int i = 0; i < numInputs; i++) {
-        inputLayer[i]->print();
-    }
-    std::cout << std::endl;
+    // std::cout << "Output: " << sigmoid(n2) << std::endl;
 
-    std::cout << "Hidden Layer" << std::endl;
-    for (int i = 0; i < numHiddenLayers; i++) {
+    return sigmoid(n2);
+}
+
+// ANN helper functions
+void ANN::trainHelper(Mushroom* m) {
+    feedforward(m);
+
+    float targetValue = (m->getMushroomClass()) ? 1.0f : 0.0f;
+    float outputError = (targetValue - sigmoid(outputLayer[0]->getInput())) * sigmoidDerivative(outputLayer[0]->getInput());
+
+    std::vector<float> hiddenLayerErrors(numNeuronsPerHiddenLayer);
+
+    for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
+        hiddenLayerErrors[j] = outputError * outputWeights[j][0] * sigmoidDerivative(hiddenLayers[0][j]->getInput());
+    }
+
+    for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
+        outputWeights[i][0] += learningRate * outputError * sigmoid(hiddenLayers[0][i]->getInput());
+    }
+    outputBias += learningRate * outputError;
+
+    for (int i = 0; i < numInputs; i++) {
         for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-            hiddenLayers[i][j]->print();
+            weights[i][j] += learningRate * hiddenLayerErrors[j] * sigmoid(inputLayer[i]->getInput()) - learningRate * 0.00001 * weights[i][j];
         }
     }
-    std::cout << std::endl;
-
-    std::cout << "Output Layer" << std::endl;
-    for (int i = 0; i < numOutputs; i++) {
-        outputLayer[i]->print();
-    }
-    std::cout << std::endl;
-
-    std::cout << "Expected output" << std::endl;
-    std::cout << m->getMushroomClass() << std::endl;
-
-    // Backpropagate the neural network
-    // Calculate the error for each node in the output layer
-    // Calculate the weight correction term for each node in the output layer
-    // Calculate the bias correction term for each node in the output layer
-    // Calculate the sum of delta inputs for each node in the hidden layer
-    // Calculate the error information term for each node in the hidden layer
-    // Calculate the weight error term for each node in the hidden layer
-    // Calculate the bias error term for each node in the hidden layer
-
-    // float error = 0.0;
-    // float weightCorrectionTerm = 0.0;
-    // float biasCorrectionTerm = 0.0;
-    // float sumDeltaInput = 0.0;
-    // float errorInformationTerm = 0.0;
-    // float weightErrorTerm = 0.0;
-    // float biasErrorTerm = 0.0;
-
-    // std::vector <float> outputLayerError = std::vector<float>();
-
-    // for (int i = 0; i < numOutputs; i++) {
-    //     // deltak = (tk - f(n2k)) * f'(n2k)
-    //     float targetValue = (m->getMushroomClass() == 0) ? 0.0f : 1.0f;
-    //     error = (targetValue - sigmoid(outputLayer[i]->getInput())) * sigmoidDerivative(outputLayer[i]->getInput());
-
-    //     // deltawik = alpha * deltak * f(n1i)
-    //     for (int n = 0; n < hiddenLayers.size(); n++) {
-    //         for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-    //             weightCorrectionTerm = learningRate * error * sigmoid(hiddenLayers[n][j]->getInput());
-    //         }
-    //     }
-
-    //     // deltaw0k = alpha * deltak
-    //     biasCorrectionTerm = learningRate * error;
-
-    //     outputLayerError.push_back(error);
-
-    //     outputLayer[i]->setWeight(outputLayer[i]->getWeight() + weightCorrectionTerm);
-    //     outputLayer[i]->setBias(outputLayer[i]->getBias() + biasCorrectionTerm);
-    // }
-
-    // // Sum of the delta inputs from the output layer for each node in the hidden layer:
-    // // deltai = sum(deltak * wki)
-    // for (int k = 0; k < numHiddenLayers; k++) {
-    //     for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
-    //         for (int j = 0; j < numOutputs; j++) {
-    //             sumDeltaInput += outputLayerError[j] * hiddenLayers[k][i]->getWeight();
-    //         }
-    //     }
-    // }
-
-    // for (int i = 0; i < hiddenLayers.size(); i++) {
-    //     for (int j = 0; j < hiddenLayers[0].size(); j++) {
-            
-    //         // deltai = deltani * f'(ni)
-    //         errorInformationTerm = sumDeltaInput * sigmoidDerivative(hiddenLayers[i][j]->getInput());
-
-    //         // delta vli = alpha * deltali * xi
-    //         for (int k = 0; k < numInputs; k++) {
-    //             weightErrorTerm += learningRate * errorInformationTerm * inputLayer[k]->getInput();
-    //         }
-            
-    //         biasErrorTerm = learningRate * errorInformationTerm;
-
-    //         // wik(new) = wik(old) + deltawik
-    //         hiddenLayers[i][j]->setWeight(hiddenLayers[i][j]->getWeight() + weightErrorTerm);
-    //         hiddenLayers[i][j]->setBias(hiddenLayers[i][j]->getBias() + biasErrorTerm);
-    //     }
-    // }
+    hiddenBias += learningRate * std::accumulate(hiddenLayerErrors.begin(), hiddenLayerErrors.end(), 0.0f);
 }
 
 float ANN::sigmoid(float x) {
     // Sigmoid activation function
-    return 1 / (1 + exp(-relu(x)));
+    return 1 / (1 + exp(-x));
 }
 
 float ANN::sigmoidDerivative(float x) {
@@ -286,8 +242,8 @@ float ANN::sigmoidDerivative(float x) {
 
 float ANN::getRandomFloat() {
     // Generate a random float between -0.5 and 0.5
-    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    // return static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5;
+    // return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5;
 }
 
 int ANN::getIndexOfMushroom(Mushroom* m) {
@@ -300,6 +256,17 @@ int ANN::getIndexOfMushroom(Mushroom* m) {
     return -1;
 }
 
-float ANN::relu(float x) {
-    return (x > 0.0f) ? x : 0.0f;
+float ANN::calculateLoss() {
+    float totalLoss = 0.0f;
+    for (Mushroom* m : trainData) {
+        float outputValue = feedforward(m);
+        float targetValue = (m->getMushroomClass()) ? 1.0f : 0.0f;
+        totalLoss += -targetValue * log(outputValue) - (1 - targetValue) * log(1 - outputValue);
+    }
+    return totalLoss / trainData.size();
+}
+
+float ANN::getRandomAlt(int numInputs) {
+    float range = sqrt(6.0 / numInputs);
+    return static_cast <float> (rand()) / (static_cast <float> (RAND_MAX) / (2 * range)) - range;
 }
