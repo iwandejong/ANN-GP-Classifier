@@ -1,0 +1,49 @@
+#ifndef ANN_H
+#define ANN_H
+
+#include <iostream>
+#include <vector>
+
+#include "Mushroom.h"
+#include "Node.h"
+
+class ANN {
+    private:
+        std::vector<Mushroom*> trainData;
+        std::vector<Mushroom*> testData;
+
+        const int numInputs = 8;
+        const int numOutputs = 2;
+        const int numHiddenLayers = 1;
+        const int numNeuronsPerHiddenLayer = 8;
+
+        std::vector<Node*> inputLayer;
+        std::vector<std::vector<Node*>> hiddenLayers;
+        std::vector<Node*> outputLayer;
+
+        int stoppingCriteria = 1000;
+    public:
+        ANN(int stoppingCriteria = 1000);
+        ~ANN();
+        void addMushroomToTrain(Mushroom* m);
+        void addMushroomToTest(Mushroom* m);
+        void print();
+        void train();
+        void test();
+        bool classify(Mushroom* m);
+        void save();
+        void load();
+
+        void visualize();
+
+        void feedforward(Mushroom* m);
+        void backpropagation();
+        void updateWeights();
+
+        float sigmoid(float x);
+        float getRandomFloat();
+
+        int getIndexOfMushroom(Mushroom* m);
+};
+
+#endif // ANN_H
