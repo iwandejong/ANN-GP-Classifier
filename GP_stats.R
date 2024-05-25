@@ -3,7 +3,7 @@ library(ggplot2)
 library(gghighlight)
 
 # Load the data
-data <- read.csv("outputs.csv")
+data <- read.csv("GP_outputs.csv")
 
 # Generate statistics
 mean(data$Output)
@@ -21,7 +21,7 @@ plot(data$Output, xlim=c(0, 600), ylim=c(0, 1), xlab="Mushroom", ylab="Output")
 # if actual = true, then output should be green, otherwise red
 points(data$Output, col=ifelse(data$Actual == data$Expected, "green", "red"))
 # draw a line on 0.5
-abline(h=0.5, col="blue")
+abline(h=0.8, col="blue")
 
 
 
@@ -35,7 +35,9 @@ ggplot(data, aes(x=Output)) +
   theme_minimal()
 
 # Load error from epoch
-error <- read.csv("error.csv")
+error <- read.csv("GP_error.csv")
 
 # Generate error plot
-plot(error$Error, xlab="Epoch", ylab="Error")
+ggplot(error, aes(x=Generation, y=TrainingAcc)) +
+  geom_line() +
+  theme_minimal()

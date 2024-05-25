@@ -73,16 +73,16 @@ void ANN::train() {
 
     // visualize();
 
+    std::ofstream file("error.csv");
+    file << "Error" << std::endl;
+
     // initialize weights and biases
     inputBias = getRandomFloat();
 
-    if (stoppingCriteria > trainData.size()) {
-        stoppingCriteria = trainData.size();
-    }
     while (i < stoppingCriteria) {
         // select a random mushroom from the training data
         int randomIndex = rand() % trainData.size();
-        trainHelper(trainData[randomIndex]);
+        trainHelper(trainData[randomIndex], file);
         // trainHelper(trainData[i]);
         
         if (i % 100 == 0) { // Print loss every 100 iterations
@@ -259,11 +259,14 @@ float ANN::feedforward(Mushroom* m, bool training) {
 }
 
 // ANN helper functions
-void ANN::trainHelper(Mushroom* m) {
+void ANN::trainHelper(Mushroom* m, std::ofstream& file) {
     feedforward(m);
-    std::cout << "Class: " << m->getMushroomClass() << std::endl;
+    // std::cout << "Class: " << m->getMushroomClass() << std::endl;
     float targetValue = (m->getMushroomClass()) ? 1.0f : 0.0f;
     float outputError = (targetValue - sigmoid(outputLayer[0]->getInput())) * sigmoidDerivative(outputLayer[0]->getInput());
+
+    // write error to file
+    file << outputError << std::endl;
 
     std::vector<float> hiddenLayerErrors(numNeuronsPerHiddenLayer);
 

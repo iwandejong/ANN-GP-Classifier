@@ -49,7 +49,7 @@ class ANN {
         // void backpropagation();
         // void updateWeights();
 
-        void trainHelper(Mushroom* m);
+        void trainHelper(Mushroom* m, std::ofstream& file);
         float feedforward(Mushroom* m, bool training = true);
 
         float sigmoid(float x);

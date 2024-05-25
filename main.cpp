@@ -1,9 +1,11 @@
 #include "ANN.h"
+#include "GP.h"
 
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cstdlib>
 
 std::vector<std::vector<float>> normalizeData(const std::vector<std::vector<float>>& data) {
     std::vector<std::vector<float>> normalizedData = data;
@@ -27,7 +29,8 @@ std::vector<std::vector<float>> normalizeData(const std::vector<std::vector<floa
     return normalizedData;
 }
 
-void csvToObject(std::string inputFile, ANN* ann, const std::vector<float>& minVals, const std::vector<float>& maxVals, bool isTrain = true) {
+template <typename T>
+void csvToObject(std::string inputFile, T* obj, const std::vector<float>& minVals, const std::vector<float>& maxVals, bool isTrain = true) {
     std::ifstream file(inputFile);
     std::string line;
     std::string lineArray[9];
@@ -74,12 +77,12 @@ void csvToObject(std::string inputFile, ANN* ann, const std::vector<float>& minV
         float s = values[7];
         bool mC = values[8] == 1 ? true : false;
 
-        std::cout << cD << " " << cS << " " << gA << " " << gC << " " << sH << " " << sW << " " << sC << " " << s << " " << mC << std::endl;
+        // std::cout << cD << " " << cS << " " << gA << " " << gC << " " << sH << " " << sW << " " << sC << " " << s << " " << mC << std::endl;
 
         if (isTrain) {
-            ann->addMushroomToTrain(new Mushroom(cD, cS, gA, gC, sH, sW, sC, s, mC));
+            obj->addMushroomToTrain(new Mushroom(cD, cS, gA, gC, sH, sW, sC, s, mC));
         } else {
-            ann->addMushroomToTest(new Mushroom(cD, cS, gA, gC, sH, sW, sC, s, mC));
+            obj->addMushroomToTest(new Mushroom(cD, cS, gA, gC, sH, sW, sC, s, mC));
         }
     }
 }
@@ -109,21 +112,27 @@ void computeMinAndMax(std::string inputFile, std::vector<float>& minVals, std::v
 }
 
 int main() {
+    std::srand(1);
 
     ANN* ann = new ANN(1000, 0.23);
+    GP* gp = new GP();
 
     std::vector<float> minVals;
     std::vector<float> maxVals;
 
     computeMinAndMax("mushroom_data/mushroom_train.csv", minVals, maxVals);
     csvToObject("mushroom_data/mushroom_train.csv", ann, minVals, maxVals, true);
+    csvToObject("mushroom_data/mushroom_train.csv", gp, minVals, maxVals, true);
 
     computeMinAndMax("mushroom_data/mushroom_test.csv", minVals, maxVals);
     csvToObject("mushroom_data/mushroom_test.csv", ann, minVals, maxVals, false);
+    csvToObject("mushroom_data/mushroom_test.csv", gp, minVals, maxVals, false);
 
-    ann->train();
-
-    // ann->visualize();
+    // ann->train();
+    
+    gp->generatePopulation();
+    gp->train();
+    gp->test();
 
     return 0;
 }
