@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #include "Node.h"
 
 Node::Node(float i) : input(i) {}

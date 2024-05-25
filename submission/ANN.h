@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #ifndef ANN_H
 #define ANN_H
 

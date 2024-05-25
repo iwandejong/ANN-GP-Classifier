@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #ifndef MUSHROOM_H
 #define MUSHROOM_H
 

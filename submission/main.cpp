@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #include "ANN.h"
 #include "GP.h"
 

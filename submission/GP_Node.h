@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #ifndef GP_NODE_H
 #define GP_NODE_H
 

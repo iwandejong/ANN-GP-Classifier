@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #include "Mushroom.h"
 
 Mushroom::Mushroom(float cD, float cS, float gA, float gC, float sH, float sW, float sC, float s, bool mC) {

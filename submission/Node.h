@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #ifndef NODE_H
 #define NODE_H
 

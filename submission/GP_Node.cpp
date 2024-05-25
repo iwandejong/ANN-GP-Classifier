@@ -1,3 +1,5 @@
+// Iwan de Jong, u22498037
+
 #include "GP_Node.h"
 
 GP_Node::GP_Node(float i) {
