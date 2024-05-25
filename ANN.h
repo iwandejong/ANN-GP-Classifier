@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <cmath>
+#include <fstream>
 
 #include "Mushroom.h"
 #include "Node.h"
@@ -58,6 +60,9 @@ class ANN {
 
         float calculateLoss();
         // float getRandomAlt(int numInputs);
+        void stats(const std::vector<bool>& predicted, const std::vector<bool>& actual);
+
+        void outputsToCSV();
 };
 
 #endif // ANN_H

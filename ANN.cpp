@@ -107,6 +107,10 @@ void ANN::test() {
 
     std::cout << "Output\t\tActual\tExpected" << std::endl;
 
+    std::vector<bool> allPredicted = std::vector<bool>();
+    std::vector<bool> allActual = std::vector<bool>();
+    std::vector<float> outputs = std::vector<float>();
+
     int correct = 0;
     int total = 0;
     for (int i = 0; i < testData.size(); i++) {
@@ -117,16 +121,49 @@ void ANN::test() {
 
         if (predicted == expected) {
             std::cout << "\033[32m" << std::fixed << outputValue << "\t" << predicted << "\t\t" << expected << "\033[0m" << std::endl;
-            // std::cout << "Equal" << std::endl;
             correct++;
         } else {
             std::cout << "\033[31m" << std::fixed << outputValue << "\t" << predicted << "\t\t" << expected << "\033[0m" << std::endl;
         }
+        allActual.push_back(expected);
+        allPredicted.push_back(predicted);
+        outputs.push_back(outputValue);
         total++;
     }
 
     // Print the accuracy of the neural network
-    std::cout << "Accuracy: " << (float)correct / total * 100 << "%" << std::endl;
+    // std::cout << "Accuracy: " << (float)correct / total * 100 << "%" << std::endl;
+    std::cout << std::endl << "\033[34m" << "Statistics" << "\033[0m" << std::endl;
+    stats(allPredicted, allActual);
+
+    std::cout << std::endl << "\033[36m" << "Output Statistics:" << "\033[0m" << std::endl;
+    float mean = 0.0f;
+    for (int i = 0; i < outputs.size(); i++) {
+        mean += outputs[i];
+    }
+    mean /= outputs.size();
+    std::cout << "Mean: " << mean << std::endl;
+
+    float variance = 0.0f;
+    for (int i = 0; i < outputs.size(); i++) {
+        variance += pow(outputs[i] - mean, 2);
+    }
+    variance /= outputs.size();
+    std::cout << "Variance: " << variance << std::endl;
+
+    float stdDev = sqrt(variance);
+    std::cout << "Standard Deviation: " << stdDev << std::endl;
+
+    float maxVal = outputs[0];
+    float minVal = outputs[0];
+    for (int i = 0; i < outputs.size(); i++) {
+        if (outputs[i] < minVal) minVal = outputs[i];
+        if (outputs[i] > maxVal) maxVal = outputs[i];
+    }
+    float range = maxVal - minVal;
+    std::cout << "Range: " << range << std::endl << std::endl;
+
+    outputsToCSV();
 }
 
 bool ANN::classify(Mushroom* m) {
@@ -289,3 +326,54 @@ float ANN::calculateLoss() {
 //     float range = sqrt(6.0 / numInputs);
 //     return static_cast <float> (rand()) / (static_cast <float> (RAND_MAX) / (2 * range)) - range;
 // }
+
+void ANN::stats(const std::vector<bool>& predicted, const std::vector<bool>& actual) {
+    int truePositive = 0;
+    int falsePositive = 0;
+    int trueNegative = 0;
+    int falseNegative = 0;
+
+    for (size_t i = 0; i < predicted.size(); ++i) {
+        if (predicted[i] == true && actual[i] == true) {
+            truePositive++;
+        } else if (predicted[i] == true && actual[i] == false) {
+            falsePositive++;
+        } else if (predicted[i] == false && actual[i] == true) {
+            falseNegative++;
+        } else if (predicted[i] == false && actual[i] == false) {
+            trueNegative++;
+        }
+    }
+
+    // Precision = True Positives / (True Positives + False Positives)
+    float precision = static_cast<float>(truePositive) / (truePositive + falsePositive);
+
+    // Recall = True Positives / (True Positives + False Negatives)
+    float recall = static_cast<float>(truePositive) / (truePositive + falseNegative);
+
+    // Accuracy = (True Positives + True Negatives) / Total
+    float accuracy = static_cast<float>(truePositive + trueNegative) / predicted.size();
+
+    // F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
+    float f1Score = 2.0f * (precision * recall) / (precision + recall);
+
+    std::cout << "Precision: " << precision << std::endl;
+    std::cout << "Recall: " << recall << std::endl;
+    std::cout << "Accuracy: " << accuracy << std::endl;
+    std::cout << "F1 Score: " << f1Score << std::endl;
+}
+
+void ANN::outputsToCSV() {
+    std::ofstream file("outputs.csv");
+    file << "Output,Actual,Expected" << std::endl;
+
+    for (int i = 0; i < testData.size(); i++) {
+        float outputValue = feedforward(testData[i], false);
+        bool predicted = classify(testData[i]);
+        bool expected = testData[i]->getMushroomClass();
+        file << outputValue << "," << predicted << "," << expected << std::endl;
+    }
+    file.close();
+
+    std::cout << "Outputs written to outputs.csv" << std::endl;
+}
