@@ -1,8 +1,8 @@
 compile:
-	g++ -g -std=c++11 *.cpp -o main
+	g++ -g -std=c++11 *.cpp -o main.o
 run:
-	./main
+	./main.o
 leaks:
-	leaks -atExit -- ./main
+	leaks -atExit -- ./main.o
 clean:
 	rm *.o
