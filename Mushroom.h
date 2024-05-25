@@ -5,29 +5,29 @@
 
 class Mushroom {
     private:
-        int capDiameter;
-        int capShape;
-        bool gillAttachment;
-        int gillColor;
+        float capDiameter;
+        float capShape;
+        float gillAttachment;
+        float gillColor;
         float stemHeight;
-        int stemWidth;
-        int stemColor;
+        float stemWidth;
+        float stemColor;
         float season;
-        int mushroomClass;
+        bool mushroomClass;
     public:
-        Mushroom(int cD = 0, int cS = 0, bool gA = false, int gC = 0.0, float sH = 0.0, int sW = 0, int sC = 0, float s = 0.0, int mC = 0);
+        Mushroom(float cD = 0.0, float cS = 0.0, float gA = 0.0, float gC = 0.0, float sH = 0.0, float sW = 0.0, float sC = 0.0, float s = 0.0, bool mC = false);
         ~Mushroom();
         void print();
 
-        int getCapDiameter();
-        int getCapShape();
-        bool getGillAttachment();
-        int getGillColor();
+        float getCapDiameter();
+        float getCapShape();
+        float getGillAttachment();
+        float getGillColor();
         float getStemHeight();
-        int getStemWidth();
-        int getStemColor();
+        float getStemWidth();
+        float getStemColor();
         float getSeason();
-        int getMushroomClass();
+        bool getMushroomClass();
 
         float getAttribute(int i);
 };

@@ -1,6 +1,6 @@
 #include "Mushroom.h"
 
-Mushroom::Mushroom(int cD, int cS, bool gA, int gC, float sH, int sW, int sC, float s, int mC) {
+Mushroom::Mushroom(float cD, float cS, float gA, float gC, float sH, float sW, float sC, float s, bool mC) {
     capDiameter = cD;
     capShape = cS;
     gillAttachment = gA;
@@ -26,19 +26,19 @@ void Mushroom::print() {
     // std::cout << "Mushroom Class: " << mushroomClass << std::endl;
 }
 
-int Mushroom::getCapDiameter() {
+float Mushroom::getCapDiameter() {
     return capDiameter;
 }
 
-int Mushroom::getCapShape() {
+float Mushroom::getCapShape() {
     return capShape;
 }
 
-bool Mushroom::getGillAttachment() {
+float Mushroom::getGillAttachment() {
     return gillAttachment;
 }
 
-int Mushroom::getGillColor() {
+float Mushroom::getGillColor() {
     return gillColor;
 }
 
@@ -46,11 +46,11 @@ float Mushroom::getStemHeight() {
     return stemHeight;
 }
 
-int Mushroom::getStemWidth() {
+float Mushroom::getStemWidth() {
     return stemWidth;
 }
 
-int Mushroom::getStemColor() {
+float Mushroom::getStemColor() {
     return stemColor;
 }
 
@@ -58,7 +58,7 @@ float Mushroom::getSeason() {
     return season;
 }
 
-int Mushroom::getMushroomClass() {
+bool Mushroom::getMushroomClass() {
     return mushroomClass;
 }
 
