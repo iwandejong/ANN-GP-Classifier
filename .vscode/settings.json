@@ -51,6 +51,7 @@
         "optional": "cpp",
         "unordered_map": "cpp",
         "deque": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "*.txt": "c"
     }
 }

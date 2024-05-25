@@ -16,11 +16,8 @@ sd(data$Actual)
 sd(data$Expected)
 
 # Generate plots
-# show more details in x axis
 plot(data$Output, xlim=c(0, 600), ylim=c(0, 1), xlab="Mushroom", ylab="Output")
-# if actual = true, then output should be green, otherwise red
 points(data$Output, col=ifelse(data$Actual == data$Expected, "green", "red"))
-# draw a line on 0.5
 abline(h=0.5, col="blue")
 
 

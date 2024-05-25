@@ -84,7 +84,7 @@ void ANN::train() {
         
         if (i % 100 == 0) { // Print loss every 100 iterations
             float loss = calculateLoss();
-            std::cout << "Iteration " << i << ", Loss: " << loss << std::endl;
+            std::cout << "Iteration " << i << ", Error: " << loss << std::endl;
             if (i % 1000 == 0 && i > 0) {
                 learningRate *= 0.9;
             }
