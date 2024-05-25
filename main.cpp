@@ -74,7 +74,7 @@ void csvToObject(std::string inputFile, ANN* ann, const std::vector<float>& minV
         float s = values[7];
         bool mC = values[8] == 1 ? true : false;
 
-        // std::cout << cD << " " << cS << " " << gA << " " << gC << " " << sH << " " << sW << " " << sC << " " << s << " " << mC << std::endl;
+        std::cout << cD << " " << cS << " " << gA << " " << gC << " " << sH << " " << sW << " " << sC << " " << s << " " << mC << std::endl;
 
         if (isTrain) {
             ann->addMushroomToTrain(new Mushroom(cD, cS, gA, gC, sH, sW, sC, s, mC));
@@ -110,7 +110,7 @@ void computeMinAndMax(std::string inputFile, std::vector<float>& minVals, std::v
 
 int main() {
 
-    ANN* ann = new ANN(10000, 0.002);
+    ANN* ann = new ANN(1000, 0.2);
 
     std::vector<float> minVals;
     std::vector<float> maxVals;

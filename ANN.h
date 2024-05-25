@@ -16,7 +16,7 @@ class ANN {
         const int numInputs = 8;
         const int numOutputs = 1;
         const int numHiddenLayers = 1;
-        const int numNeuronsPerHiddenLayer = 12;
+        const int numNeuronsPerHiddenLayer = 16;
         
         float learningRate = 0.1;
 
@@ -25,7 +25,7 @@ class ANN {
         std::vector<Node*> outputLayer;
 
         float inputBias = 1.0;
-        float hiddenBias = 1.0;
+        std::vector <float> hiddenBias;
         float outputBias = 1.0;
 
         std::vector<std::vector<float>> weights;
@@ -48,7 +48,7 @@ class ANN {
         // void updateWeights();
 
         void trainHelper(Mushroom* m);
-        float feedforward(Mushroom* m);
+        float feedforward(Mushroom* m, bool training = true);
 
         float sigmoid(float x);
         float sigmoidDerivative(float x);
@@ -57,7 +57,7 @@ class ANN {
         int getIndexOfMushroom(Mushroom* m);
 
         float calculateLoss();
-        float getRandomAlt(int numInputs);
+        // float getRandomAlt(int numInputs);
 };
 
 #endif // ANN_H

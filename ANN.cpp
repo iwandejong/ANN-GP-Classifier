@@ -24,7 +24,7 @@ ANN::ANN(int stoppingCriteria, float learningRate) {
     for (int i = 0; i < numInputs; i++) {
         std::vector<float> weight;
         for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-            weight.push_back(getRandomAlt(numInputs));
+            weight.push_back(getRandomFloat());
         }
         weights.push_back(weight);
     }
@@ -32,16 +32,19 @@ ANN::ANN(int stoppingCriteria, float learningRate) {
     for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
         std::vector<float> outputWeight;
         for (int j = 0; j < numOutputs; j++) {
-            outputWeight.push_back(getRandomAlt(numNeuronsPerHiddenLayer));
+            outputWeight.push_back(getRandomFloat());
         }
         outputWeights.push_back(outputWeight);
     }
 
     // visualize();
 
-    inputBias = getRandomAlt(numInputs);
-    hiddenBias = getRandomAlt(numNeuronsPerHiddenLayer);
-    outputBias = getRandomAlt(numNeuronsPerHiddenLayer);
+    inputBias = getRandomFloat();
+    hiddenBias = std::vector<float>(numNeuronsPerHiddenLayer);
+    for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
+        hiddenBias[i] = getRandomFloat();
+    }
+    outputBias = getRandomFloat();
 
     this->stoppingCriteria = stoppingCriteria;
     this->learningRate = learningRate;
@@ -73,10 +76,14 @@ void ANN::train() {
     // initialize weights and biases
     inputBias = getRandomFloat();
 
+    if (stoppingCriteria > trainData.size()) {
+        stoppingCriteria = trainData.size();
+    }
     while (i < stoppingCriteria) {
         // select a random mushroom from the training data
         int randomIndex = rand() % trainData.size();
         trainHelper(trainData[randomIndex]);
+        // trainHelper(trainData[i]);
         
         if (i % 100 == 0) { // Print loss every 100 iterations
             float loss = calculateLoss();
@@ -98,17 +105,22 @@ void ANN::train() {
 void ANN::test() {
     // Test the neural network
 
-    // Classify each mushroom in the test data
-    std::vector<bool> results;
-    for (int i = 0; i < testData.size(); i++) {
-        results.push_back(classify(testData[i]));
-    }
+    std::cout << "Output\t\tActual\tExpected" << std::endl;
 
     int correct = 0;
     int total = 0;
     for (int i = 0; i < testData.size(); i++) {
-        if (results[i] == testData[i]->getMushroomClass()) {
+        float outputValue = feedforward(testData[i], false);
+        bool predicted = classify(testData[i]);
+        bool expected = testData[i]->getMushroomClass();
+
+
+        if (predicted == expected) {
+            std::cout << "\033[32m" << std::fixed << outputValue << "\t" << predicted << "\t\t" << expected << "\033[0m" << std::endl;
+            // std::cout << "Equal" << std::endl;
             correct++;
+        } else {
+            std::cout << "\033[31m" << std::fixed << outputValue << "\t" << predicted << "\t\t" << expected << "\033[0m" << std::endl;
         }
         total++;
     }
@@ -119,7 +131,10 @@ void ANN::test() {
 
 bool ANN::classify(Mushroom* m) {
     // Classify the mushroom based on the output
-    return feedforward(m) > 0.5 ? true : false;
+    float outputValue = feedforward(m, false);
+    // std::cout << "Pre-output: " << (float)outputValue << "%" << std::endl;
+    bool returnValue = (outputValue < 0.5) ? true : false;
+    return returnValue;
 }
 
 void ANN::visualize() {
@@ -154,12 +169,13 @@ void ANN::visualize() {
     std::cout << "\t\t\tOutput Neuron: \t[" << sigmoid(outputLayer[0]->getInput()) << "]" << std::endl;
 }
 
-float ANN::feedforward(Mushroom* m) {
+float ANN::feedforward(Mushroom* m, bool training) {
     // Feedforward the neural network
     // Calculate n1 for each node in the hidden layer
     // Calculate activation function for each node in the hidden layer
     // Calculate n2 for each node in the output layer
     // Calculate activation function for each node in the output layer
+    // std::cout << training << std::endl;
 
     // Set the input layer
     for (int i = 0; i < numInputs; i++) {
@@ -174,13 +190,13 @@ float ANN::feedforward(Mushroom* m) {
         for (int i = 0; i < numNeuronsPerHiddenLayer; i++) {
             // dropout
             float dropoutValue = (float)rand() / RAND_MAX;
-            if (dropoutValue < dropoutRate) {
+            if (dropoutValue < dropoutRate && training) {
                 hiddenLayers[n][i]->setInput(0.0f);
             } else {
                 // n1j = v0j + sum(vij * xi)
-                float n1 = hiddenBias;
+                float n1 = hiddenBias[i];
                 for (int k = 0; k < numInputs; k++) {
-                    n1 += weights[k][i] * sigmoid(inputLayer[k]->getInput());
+                    n1 += weights[k][i] * inputLayer[k]->getInput();
                 }
                 hiddenLayers[n][i]->setInput(n1);
             }
@@ -188,12 +204,13 @@ float ANN::feedforward(Mushroom* m) {
     }
 
     // calculate the activation function for each node in the output layer
-    float n2 = outputBias;
+    float n2 = 0.0f;
     for (int i = 0; i < numOutputs; i++) {
+        n2 = outputBias;
         // n2m = w0m + sum(wjm * f(n1j))
         for (int k = 0; k < hiddenLayers.size(); k++) {
             for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
-                n2 += outputWeights[j][i] * sigmoid(hiddenLayers[k][j]->getInput());
+                n2 += outputWeights[j][i] * sigmoid(hiddenLayers.back()[j]->getInput());
             }
         }
         outputLayer[i]->setInput(n2);
@@ -207,7 +224,7 @@ float ANN::feedforward(Mushroom* m) {
 // ANN helper functions
 void ANN::trainHelper(Mushroom* m) {
     feedforward(m);
-
+    std::cout << "Class: " << m->getMushroomClass() << std::endl;
     float targetValue = (m->getMushroomClass()) ? 1.0f : 0.0f;
     float outputError = (targetValue - sigmoid(outputLayer[0]->getInput())) * sigmoidDerivative(outputLayer[0]->getInput());
 
@@ -227,17 +244,19 @@ void ANN::trainHelper(Mushroom* m) {
             weights[i][j] += learningRate * hiddenLayerErrors[j] * sigmoid(inputLayer[i]->getInput()) - learningRate * 0.00001 * weights[i][j];
         }
     }
-    hiddenBias += learningRate * std::accumulate(hiddenLayerErrors.begin(), hiddenLayerErrors.end(), 0.0f);
+    for (int j = 0; j < numNeuronsPerHiddenLayer; j++) {
+        hiddenBias[j] += learningRate * hiddenLayerErrors[j];
+    }
 }
 
 float ANN::sigmoid(float x) {
     // Sigmoid activation function
-    return 1 / (1 + exp(-x));
+    return 1.0f / (1.0f + exp(-x));
 }
 
 float ANN::sigmoidDerivative(float x) {
     // Derivative of the sigmoid activation function
-    return sigmoid(x) * (1 - sigmoid(x));
+    return sigmoid(x) * (1.0f - sigmoid(x));
 }
 
 float ANN::getRandomFloat() {
@@ -263,10 +282,10 @@ float ANN::calculateLoss() {
         float targetValue = (m->getMushroomClass()) ? 1.0f : 0.0f;
         totalLoss += -targetValue * log(outputValue) - (1 - targetValue) * log(1 - outputValue);
     }
-    return totalLoss / trainData.size();
+    return (float)totalLoss / trainData.size();
 }
 
-float ANN::getRandomAlt(int numInputs) {
-    float range = sqrt(6.0 / numInputs);
-    return static_cast <float> (rand()) / (static_cast <float> (RAND_MAX) / (2 * range)) - range;
-}
+// float ANN::getRandomAlt(int numInputs) {
+//     float range = sqrt(6.0 / numInputs);
+//     return static_cast <float> (rand()) / (static_cast <float> (RAND_MAX) / (2 * range)) - range;
+// }
