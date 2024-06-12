@@ -114,7 +114,7 @@ void computeMinAndMax(std::string inputFile, std::vector<float>& minVals, std::v
 int main() {
     std::srand(1);
 
-    ANN* ann = new ANN(1000, 0.23);
+    ANN* ann = new ANN(600000, 0.23);
     GP* gp = new GP();
 
     std::vector<float> minVals;
